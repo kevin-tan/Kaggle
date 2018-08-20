@@ -7,8 +7,8 @@ from sklearn.preprocessing import Imputer
 from sklearn.model_selection import cross_val_score
 
 # Load .csv file
-data = pd.read_csv("train.csv")
-test_data = pd.read_csv("test.csv")
+data = pd.read_csv("../data/houses/train.csv")
+test_data = pd.read_csv("../data/houses/test.csv")
 
 # Setup train_X/train_Y, test_X/test_Y data
 features = ["LotArea", "YearBuilt", "1stFlrSF", "2ndFlrSF", "FullBath", "BedroomAbvGr", "TotRmsAbvGrd"]
@@ -44,6 +44,8 @@ random_forest.fit(train_X, train_y)
 random_forest_pred = random_forest.predict(test_X)
 print("RandomForest MAE:", mean_absolute_error(test_y, random_forest_pred))
 
+# -------------------------------------------------------------------------------------------------
+
 # Handling missing values
 missing_vals = data.isnull().sum()
 col_missing_vals = missing_vals[missing_vals > 0]
@@ -65,12 +67,16 @@ col_missing_vals = missing_vals[missing_vals > 0]
 #    new_data[col + "_was_missing_a_val"] = new_data[col].isnull() # Adding new column called col + "_was_misisng_a_val"
 # Etc ...
 
+# -------------------------------------------------------------------------------------------------
+
 # One-hot encoding (Categorical Data)
 # Use the pd.get_dummies() on the categorical columns
 
-from xgboost import XGBRegressor
+# -------------------------------------------------------------------------------------------------
 
 # XGBoost (model which works well with tabular data)
+from xgboost import XGBRegressor
+
 data.dropna(axis=0, subset=['SalePrice'], inplace=True)  # Remove any SalePrice row containing null
 X1 = data.drop(['SalePrice'], axis=1).select_dtypes(
     exclude=['object'])  # Get all cols except sale price and object types
@@ -97,16 +103,16 @@ print(xgbModel.best_iteration)
 prediction = xgbModel.predict(test_X1)
 print("XGBoost MAE:", mean_absolute_error(prediction, test_y1))
 
+# -------------------------------------------------------------------------------------------------
+
 # Partial Dependence plot
 from sklearn.ensemble.partial_dependence import partial_dependence, plot_partial_dependence
 from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
 import matplotlib.pyplot as plt
-
 col_to_plot = ['LotArea', 'YearBuilt', 'OverallQual']
 
-
 def get_some_data():
-    data = pd.read_csv("train.csv")
+    data = pd.read_csv("../data/houses/train.csv")
     y = data.SalePrice
     X = data[col_to_plot]
     imputer = Imputer()
@@ -121,4 +127,39 @@ my_model.fit(X, y)
 # features: specify the index of which of the feature_names you want to plot
 # feature_names: list of columns you want to see
 plot_partial_dependence(my_model, features=[0, 2], X=X, feature_names=col_to_plot, grid_resolution=50)
-plt.show()
+# plt.show()
+
+# -------------------------------------------------------------------------------------------------
+
+# Pipeline (making the data processing code clean)
+from sklearn.pipeline import make_pipeline
+
+# Always must start with a transformer and end with a model
+# Transformers are pre-processing before the modeling, ex. Imputer, there can be a sequence of transformers in a pipeline
+# Models are used for the prediction. Transformers are usually pre-processing data before getting fitted into the model
+pipeline = make_pipeline(Imputer(), RandomForestRegressor())
+
+# The next two lines are equivalent to imputing the data for train_X and test_X and then fitting and predicting
+pipeline.fit(train_X, train_y)
+print("Pipeline with RFR MAE:", mean_absolute_error(test_y, pipeline.predict(test_X)))
+
+# -------------------------------------------------------------------------------------------------
+
+# Cross-Validation (more reliable than using train_test_split but longer process to measure model's quality)
+# It is the processing of running our model against different subsets of the data (splitting up the data differently for train and test)
+# This gives us multiple measures of model quality
+# Ex. In a 5 fold/experiment, we divide the data into 5 where 4/5 is the training data and 1/5 is the test.
+# The 1st experiment will use the first 20% of the dataset as test data, and the rest as train data
+# The 2nd experiment will use the next 20% of the dataset and so on.
+
+# Usaully for small dataset use cross-validation
+# and large dataset use train_test_split
+# But always make sure considering both, time vs. quality trade-off
+
+data = pd.read_csv("../data/houses/train.csv")
+col_to_use = ["LotArea", "OverallQual", "GarageArea", "TotRmsAbvGrd"]
+X = data[col_to_use]
+y = data.SalePrice
+pipeline = make_pipeline(Imputer(), RandomForestRegressor())
+scoring = cross_val_score(pipeline, X, y, scoring='neg_mean_absolute_error')
+print(f'Mean MAE: {-1*scoring.mean()}') # String interpolation f'... {vars + operations possible}'
