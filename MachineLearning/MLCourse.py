@@ -160,6 +160,25 @@ data = pd.read_csv("../data/houses/train.csv")
 col_to_use = ["LotArea", "OverallQual", "GarageArea", "TotRmsAbvGrd"]
 X = data[col_to_use]
 y = data.SalePrice
+
 pipeline = make_pipeline(Imputer(), RandomForestRegressor())
 scoring = cross_val_score(pipeline, X, y, scoring='neg_mean_absolute_error')
 print(f'Mean MAE: {-1*scoring.mean()}') # String interpolation f'... {vars + operations possible}'
+
+# Data leakage
+# What is it? Data leakage causes the model to look accurate but when its time to make decisions with the model, it becomes very inaccurate.
+
+# Two types: Leaky Predictors and Leaky Validation Strategies
+
+# Leaky Predictors
+# Occures when predictors include data that will not be available when a prediction is being done
+# Prevention is data specific, two rule of thumb:
+# > Look for possible leaky predictors, look for columns that are statistically correlated to the target
+# > If your model is extremely accurate, possible leaky predictor
+
+# Leaky Validation Strategy
+# Occurs when we aren't careful distinguishing between validation data and training data.
+# Ex. Imputating the data before separating the train and test data.
+# Which corrupts the validation data since Validation is meant to be a measure of how the model does on data that it hasn't considered yet.
+# Preventions:
+# Use Pipelines to reduce this possible error (critical that Pipelines are used in cross-validation)
