@@ -14,7 +14,8 @@ test_data = pd.read_csv("test.csv")
 features = ["LotArea", "YearBuilt", "1stFlrSF", "2ndFlrSF", "FullBath", "BedroomAbvGr", "TotRmsAbvGrd"]
 X = data[features]
 y = data.SalePrice
-train_X, test_X, train_y, test_y=train_test_split(X, y) # Splitting data into train and test data
+train_X, test_X, train_y, test_y = train_test_split(X, y)  # Splitting data into train and test data
+
 
 # DecisionTreeRegressor
 def get_mae(max_leaf_nodes, train_X, test_X, train_y, test_y):
@@ -23,8 +24,9 @@ def get_mae(max_leaf_nodes, train_X, test_X, train_y, test_y):
     preds = model.predict(test_X)
     return mean_absolute_error(test_y, preds)
 
+
 # Optimize model predictions by finding max leaf nodes for DecisionTreeRegressor
-test_nodes = [5,25,50,100,250,500]
+test_nodes = [5, 25, 50, 100, 250, 500]
 
 # Get node size with smallest MAE
 nodes_size_to_mae = {get_mae(nodes, train_X, test_X, train_y, test_y): nodes for nodes in test_nodes}
@@ -36,7 +38,7 @@ decision_tree.fit(train_X, train_y)
 decision_tree_pred = decision_tree.predict(test_X)
 print("DecisionTree MAE:", mean_absolute_error(test_y, decision_tree_pred))
 
-#RandomForestRegressor
+# RandomForestRegressor
 random_forest = RandomForestRegressor(random_state=0)
 random_forest.fit(train_X, train_y)
 random_forest_pred = random_forest.predict(test_X)
@@ -67,4 +69,56 @@ col_missing_vals = missing_vals[missing_vals > 0]
 # Use the pd.get_dummies() on the categorical columns
 
 from xgboost import XGBRegressor
-# XGBoost
+
+# XGBoost (model which works well with tabular data)
+data.dropna(axis=0, subset=['SalePrice'], inplace=True)  # Remove any SalePrice row containing null
+X1 = data.drop(['SalePrice'], axis=1).select_dtypes(
+    exclude=['object'])  # Get all cols except sale price and object types
+y1 = data.SalePrice  # Get sale price col
+train_X1, test_X1, train_y1, test_y1 = train_test_split(X1.values, y1.values,
+                                                        test_size=0.25)  # Reserve 25% of data as test
+
+# Impute missing data
+imputer = Imputer()
+train_X1 = imputer.fit_transform(train_X1)
+test_X1 = imputer.transform(test_X1)
+
+# n_estimators: how many time we want to go through the estimation cycle
+# learning_rate: can help reduce overfitting (good against test data, horrible in prediction) by each tree we add to ensemble helping us less
+# Small learning rate + large estimator = more accurate XGBoost models (takes longer since does more iterations)
+# Using parallelism to build models faster, use n_jobs (usually set to the # of cores). Good for large datasets
+xgbModel = XGBRegressor(n_estimators=1000, learning_rate=0.05)
+
+# early_stopping_rounds: number of consecutive rounds of deterioration of validation score is allowed before stopping
+# Eval set is a list of tuple used as validation set for early stopping
+# Can take back the test data after finding the optimal n_estimators and train the model with 100% of data
+xgbModel.fit(train_X1, train_y1, early_stopping_rounds=5, eval_set=[(test_X1, test_y1)], verbose=False)
+print(xgbModel.best_iteration)
+prediction = xgbModel.predict(test_X1)
+print("XGBoost MAE:", mean_absolute_error(prediction, test_y1))
+
+# Partial Dependence plot
+from sklearn.ensemble.partial_dependence import partial_dependence, plot_partial_dependence
+from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
+import matplotlib.pyplot as plt
+
+col_to_plot = ['LotArea', 'YearBuilt', 'OverallQual']
+
+
+def get_some_data():
+    data = pd.read_csv("train.csv")
+    y = data.SalePrice
+    X = data[col_to_plot]
+    imputer = Imputer()
+    imputed_X = imputer.fit_transform(X)
+    return imputed_X, y
+
+
+X, y = get_some_data()
+my_model = GradientBoostingRegressor()
+my_model.fit(X, y)
+# Partial Dependence Plotting
+# features: specify the index of which of the feature_names you want to plot
+# feature_names: list of columns you want to see
+plot_partial_dependence(my_model, features=[0, 2], X=X, feature_names=col_to_plot, grid_resolution=50)
+plt.show()
