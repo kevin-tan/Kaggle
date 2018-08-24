@@ -35,10 +35,15 @@ print(s[s.isin([2, 4])])
 import seaborn as sns
 import matplotlib.pyplot as plt
 d = pd.read_csv("../data/houses/train.csv")
-s = d.sample(100).groupby('SalePrice').mean() # returns DataFrame with index as saleprice and mean values for each col
-ax = sns.jointplot(x=s.index, y=s.LotArea, kind='hex')
-ax.set_axis_labels('Average LotArea', 'Sale Price', fontsize=10)
-plt.show()
+# s = d.sample(100).groupby('SalePrice').mean() # returns DataFrame with index as saleprice and mean values for each col
+# ax = sns.jointplot(x=s.index, y=s.LotArea, kind='hex')
+# ax.set_axis_labels('Average LotArea', 'Sale Price', fontsize=10)
+# plt.show()
+
+s = d.sample(100)
+g = sns.FacetGrid(s, row='LotArea', col='SalePrice')
+print(g.data)
+
 
 # We can divide two series which returns a mutated series with all its values conforming to the division i.e. (series.A / series.B).values.idxmax() returns the position of the max val of the ratio between A and B
 # Can use value_counts() returning the total counts of unique values with row label as its unique value
