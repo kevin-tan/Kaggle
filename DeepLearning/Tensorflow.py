@@ -5,7 +5,6 @@ from tensorflow.python.keras.preprocessing.image import img_to_array, load_img
 from tensorflow.python.keras.applications import ResNet50
 from tools.utils.decode_predictions import decode_predictions
 
-
 def resNet50(img_paths, img_size):
     def read_and_prep_images(img_paths, img_height=img_size, img_width=img_size):
         imgs = [load_img(img_path, target_size=(img_height, img_width)) for img_path in img_paths]
@@ -42,7 +41,7 @@ def runHotDogPrefictorWithResnet50():
     resNet50(image_paths, 224)
 
 
-# Transfer learning
+# ---------------------------------------- Transfer learning ---------------------------------------- #
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense
@@ -50,30 +49,40 @@ from tensorflow.python.keras.layers import Dense
 # Dense is the new prediction layers
 # Sequential is the main layer that will contain the pre-trained model
 
-# number of nodes in the prediction layer, i.e. what are the categories we're trying to predict to in this case 2 Urban vs Rural
+# Number of nodes in the prediction layer, i.e. what are the categories we're trying to predict to in this case 2 Urban vs Rural
 num_classes = 2
-# without top means without the prediction layer
+# Without top means without the prediction layer
 resnet_weight = '../tools/resnet50/weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
+# -- Setup of new model --
 new_model = Sequential()
-# pooling = avg means if we have extra channels in our tensor at the end of this step collapse them into a 1D tensor by taking avg of all channels
+# Pooling = avg means if we have extra channels in our tensor at the end of this step collapse them into a 1D tensor by taking avg of all channels
 new_model.add(ResNet50(include_top=False, pooling='avg', weights=resnet_weight))
-# apply a softmax function to turn the results into probability
+# Apply a softmax function to turn the results into probability
 new_model.add(Dense(num_classes, activation='softmax'))
-# tell tensor not to train first layer since we only want to train the new prediction layer
+# Tell tensor not to train first layer since we only want to train the new prediction layer
 new_model.layers[0].trainable = False
-
-# optimizing using SGD for minimize categorical_crossentropy and we want the results in accuracy
+# Optimizing using stochastic gradient descent for minimize categorical_crossentropy and we want the results in accuracy
 new_model.compile(optimizer='sgd', loss='categorical_crossentropy', metrics=['accuracy'])
+
+# -- Loading and training new model --
 
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 
 image_size = 224
 # Apply preprocess_input to every image found when generating the img set
 data_gen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
+# Load the dataset according to the packages
 train_gen = data_gen.flow_from_directory('../data/urban_rural/train', target_size=(image_size, image_size),
                                          batch_size=24, class_mode="categorical")
 test_gen = data_gen.flow_from_directory('../data/urban_rural/test', target_size=(image_size, image_size),
                                         class_mode="categorical")
-new_model.fit_generator(train_gen, steps_per_epoch=3, validation_data=test_gen, validation_steps=1)
+
+# Train
+# new_model.fit_generator(train_gen, steps_per_epoch=3, validation_data=test_gen, validation_steps=1)
+
+# Data augmentation to maximize training data set
+data_gen_with_aug = ImageDataGenerator(preprocessing_function=preprocess_input, horizontal_flip=True, width_shift_range=0.2, height_shift_range=0.2)
+train_gen_aug = data_gen_with_aug.flow_from_directory('../data/urban_rural/train', target_size=(image_size, image_size),
+                                         batch_size=12, class_mode="categorical")
+new_model.fit_generator(train_gen_aug, steps_per_epoch=6, epochs=2, validation_data=test_gen, validation_steps=1)
