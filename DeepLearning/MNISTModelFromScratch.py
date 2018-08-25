@@ -27,11 +27,16 @@ def digitsPredict():
     # Start adding the layers to the network
     model = Sequential()
     # kernel_size is the convolution size
-    model.add(Conv2D(filters=20, kernel_size=(3, 3), activation='relu', input_shape=(img_rows, img_cols, 1)))
-    model.add(Conv2D(filters=20, kernel_size=(3, 3), activation='relu'))
+    # Stride is how many row/cols to move between iteration of applying a convolution to the image
+    model.add(Conv2D(filters=20, kernel_size=(3, 3), activation='relu', input_shape=(img_rows, img_cols, 1), strides=2))
+    # Add dropout which is applied to the previous layer
+    model.add(Dropout(0.5))
+    model.add(Conv2D(filters=20, kernel_size=(3, 3), activation='relu', strides=2))
+    # Add dropout which is applied to the previous layer
+    model.add(Dropout(0.5))
     model.add(Flatten())
     model.add(Dense(128, activation='relu'))
-    model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(num_classes, activation='softmax'))  # Prediction layer
 
     # Configure the network
     model.compile(loss=keras.losses.categorical_crossentropy, optimizer='adam', metrics=['accuracy'])
@@ -40,40 +45,47 @@ def digitsPredict():
     model.fit(X, y, batch_size=128, epochs=2, validation_split=0.2)
 
 
-# Data preparation
-img_rows, img_cols = 28, 28
-num_classes = 10
+def mnistClothing():
+    # Data preparation
+    img_rows, img_cols = 28, 28
+    num_classes = 10
+
+    def prep_data(raw):
+        # out_y prep
+        # Making into a One-hot categorical (T or F)
+        out_y = keras.utils.to_categorical(raw.label, num_classes)
+
+        # out_x prep
+        x = raw.values[:, 1:]
+        num_images = raw.shape[0]  # Return a tuple with dimensions of dataframe
+        # 4-d array Array[num_images][img_rows][img_cols][1] to match the correct input for Conv2D
+        out_x = x.reshape(num_images, img_rows, img_cols, 1)
+        out_x = out_x / 255
+
+        return out_x, out_y
+
+    fashion_file = '../data/mnist/clothing/train/fashion-mnist_train.csv'
+    data_raw = pd.read_csv(fashion_file)
+    X, y = prep_data(data_raw)
+
+    # Neural network setup
+    model = Sequential()
+    # Filters/Convolution layers (i.e. 24 layered convolution) can increase since stride=2
+    model.add(Conv2D(filters=24, kernel_size=(3, 3), activation='relu', input_shape=(img_rows, img_cols, 1), strides=2))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(filters=24, kernel_size=(3, 3), activation='relu', strides=2))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(filters=24, kernel_size=(3, 3), activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(num_classes, activation='softmax'))
+
+    # Configure network
+    model.compile(loss=keras.losses.categorical_crossentropy, optimizer='adam', metrics=['accuracy'])
+
+    # Training time
+    model.fit(X, y, batch_size=100, epochs=4, validation_split=0.2)
 
 
-def prep_data(raw):
-    # out_y prep
-    # Making into a One-hot categorical (T or F)
-    out_y = keras.utils.to_categorical(raw.label, num_classes)
-
-    # out_x prep
-    x = raw.values[:, 1:]
-    num_images = raw.shape[0]  # Return a tuple with dimensions of dataframe
-    out_x = x.reshape(num_images, img_rows, img_cols, 1)
-    out_x = out_x / 255
-
-    return out_x, out_y
-
-
-fashion_file = '../data/mnist/clothing/train/fashion-mnist_train.csv'
-data_raw = pd.read_csv(fashion_file)
-X, y = prep_data(data_raw)
-
-# Neural network setup
-model = Sequential()
-model.add(Conv2D(filters=12, kernel_size=(3, 3), activation='relu', input_shape=(img_rows, img_cols, 1)))
-model.add(Conv2D(filters=12, kernel_size=(3, 3), activation='relu'))
-model.add(Conv2D(filters=12, kernel_size=(3, 3), activation='relu'))
-model.add(Flatten())
-model.add(Dense(100, activation='relu'))
-model.add(Dense(num_classes, activation='softmax'))
-
-# Configure network
-model.compile(loss=keras.losses.categorical_crossentropy, optimizer='adam', metrics=['accuracy'])
-
-# Training time
-model.fit(X, y, batch_size=100, epochs=4, validation_split=0.2)
+mnistClothing()
