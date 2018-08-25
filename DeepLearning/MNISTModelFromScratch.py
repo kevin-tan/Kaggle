@@ -52,7 +52,7 @@ def mnistClothing():
 
     def prep_data(raw):
         # out_y prep
-        # Making into a One-hot categorical (T or F)
+        # Making into a One-hot categorical (creating a column for each class and 1 or 0 to categorize)
         out_y = keras.utils.to_categorical(raw.label, num_classes)
 
         # out_x prep
