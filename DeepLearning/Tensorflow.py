@@ -82,6 +82,7 @@ test_gen = data_gen.flow_from_directory('../data/urban_rural/test', target_size=
 # new_model.fit_generator(train_gen, steps_per_epoch=3, validation_data=test_gen, validation_steps=1)
 
 # Data augmentation to maximize training data set
+# X is the images within the subdirectories combined, y is the labels of subdirectories
 data_gen_with_aug = ImageDataGenerator(preprocessing_function=preprocess_input, horizontal_flip=True, width_shift_range=0.2, height_shift_range=0.2)
 train_gen_aug = data_gen_with_aug.flow_from_directory('../data/urban_rural/train', target_size=(image_size, image_size),
                                          batch_size=12, class_mode="categorical")

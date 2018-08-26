@@ -14,6 +14,7 @@ def digitsPredict():
     def data_prep(raw):
         out_y = keras.utils.to_categorical(raw.label, num_classes)
         num_images = raw.shape[0]
+        print(type(out_y))
         x_as_array = raw.values[:, 1:]
         x_shaped_array = x_as_array.reshape(num_images, img_rows, img_cols, 1)  # Channel 1 is since greyscale image
         out_x = x_shaped_array / 255  # To get value 0 to 1 for adam
@@ -45,6 +46,7 @@ def digitsPredict():
     model.fit(X, y, batch_size=128, epochs=2, validation_split=0.2)
 
 
+
 def mnistClothing():
     # Data preparation
     img_rows, img_cols = 28, 28
@@ -60,7 +62,8 @@ def mnistClothing():
         num_images = raw.shape[0]  # Return a tuple with dimensions of dataframe
         # 4-d array Array[num_images][img_rows][img_cols][1] to match the correct input for Conv2D
         out_x = x.reshape(num_images, img_rows, img_cols, 1)
-        out_x = out_x / 255
+        out_x = out_x / 255  #
+
 
         return out_x, out_y
 
@@ -77,7 +80,7 @@ def mnistClothing():
     model.add(Dropout(0.5))
     model.add(Conv2D(filters=24, kernel_size=(3, 3), activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Flatten())
+    model.add(Flatten())  # Transform input into 1D array to connect to Dense layer
     model.add(Dense(100, activation='relu'))
     model.add(Dense(num_classes, activation='softmax'))
 
@@ -88,4 +91,5 @@ def mnistClothing():
     model.fit(X, y, batch_size=100, epochs=4, validation_split=0.2)
 
 
-mnistClothing()
+
+digitsPredict()
