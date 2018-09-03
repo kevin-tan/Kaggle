@@ -52,7 +52,8 @@ col_missing_vals = missing_vals[missing_vals > 0]
 
 # Option 1: Drop all cols with missing vals (Not the best option)
 # cols_with_missing = [col for col in data.columns if data[col].isnull().any()]
-# reduced_data = data.drop(cols_with_missing, axis=1) # row=0, col=1
+# reduced_data = data.drop(cols_with_missing, axis=1) # index=0 (since index are down), column label=1 (since column are across)
+# axis = 0 = down, axis =1 = across
 # reduced_test_data = test_data.drop(cols_with_missing, axis=1)
 
 # Option 2: Imputation (Better option)
@@ -109,7 +110,9 @@ print("XGBoost MAE:", mean_absolute_error(prediction, test_y1))
 from sklearn.ensemble.partial_dependence import partial_dependence, plot_partial_dependence
 from sklearn.ensemble import GradientBoostingRegressor, GradientBoostingClassifier
 import matplotlib.pyplot as plt
+
 col_to_plot = ['LotArea', 'YearBuilt', 'OverallQual']
+
 
 def get_some_data():
     data = pd.read_csv("../data/houses/train.csv")
@@ -152,7 +155,7 @@ print("Pipeline with RFR MAE:", mean_absolute_error(test_y, pipeline.predict(tes
 # The 1st experiment will use the first 20% of the dataset as test data, and the rest as train data
 # The 2nd experiment will use the next 20% of the dataset and so on.
 
-# Usaully for small dataset use cross-validation
+# Usually for small dataset use cross-validation
 # and large dataset use train_test_split
 # But always make sure considering both, time vs. quality trade-off
 
@@ -163,7 +166,7 @@ y = data.SalePrice
 
 pipeline = make_pipeline(Imputer(), RandomForestRegressor())
 scoring = cross_val_score(pipeline, X, y, scoring='neg_mean_absolute_error')
-print(f'Mean MAE: {-1*scoring.mean()}') # String interpolation f'... {vars + operations possible}'
+print(f'Mean MAE: {-1*scoring.mean()}')  # String interpolation f'... {vars + operations possible}'
 
 # Data leakage
 # What is it? Data leakage causes the model to look accurate but when its time to make decisions with the model, it becomes very inaccurate.
