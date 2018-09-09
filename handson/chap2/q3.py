@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import Imputer, OneHotEncoder
 from sklearn.linear_model import SGDClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score, cross_val_predict, GridSearchCV
+from sklearn.model_selection import cross_val_score, cross_val_predict, GridSearchCV, cross_validate
+from sklearn.metrics import accuracy_score
 
 # Get data from .csv file
 data = pd.read_csv('../../data/tiatinic/train/train.csv')
@@ -35,19 +37,28 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train_imputed = imputer.fit_transform(X_train)
 X_test_imputed = imputer.transform(X_test)
 
+
 # Testing with SDGClassifier
 sdg_clf = SGDClassifier()
-acc = cross_val_score(sdg_clf, X_train_imputed, y_train, scoring='accuracy', cv=3)
-print(acc)
+sdg_perf = cross_val_score(sdg_clf, X_train_imputed, y_train, scoring='accuracy', cv=3)
+print('sdg_perf', sdg_perf)
+
+# Testing with LogisticRegression
+lgs_reg = LogisticRegression(C=0.5)
+lgs_perf = cross_val_score(lgs_reg, X_train_imputed, y_train, scoring='accuracy', cv=3)
+print('lgd_perf', lgs_perf)
 
 # Testing with RandomForestClassifier
 rf_clf = RandomForestClassifier(max_depth=10)
-rf_param = [{'max_depth': [5, 6, 7, 8, 9, 10]}]
-# grid_search = GridSearchCV(rf_clf, rf_param, scoring='accuracy', cv=3)
-# grid_search.fit(X_train_imputed, y_train)
-# print(grid_search.best_estimator_)
-acc = cross_val_score(rf_clf, X_train_imputed, y_train, scoring='accuracy', cv=3)
-print(acc)
+rf_perf = cross_val_score(rf_clf, X_train_imputed, y_train, scoring='accuracy', cv=3)
+print('rf_perf', rf_perf)
+
+
+def getBestHyperparameterForEstimator():
+    rf_param = [{'max_depth': [5, 6, 7, 8, 9, 10]}]
+    grid_search = GridSearchCV(rf_clf, rf_param, scoring='accuracy', cv=3)
+    grid_search.fit(X_train_imputed, y_train)
+    print(grid_search.best_estimator_)
 
 # Analyze data
 def graphing_analysis(X_train, y_train):
