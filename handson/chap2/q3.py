@@ -12,7 +12,6 @@ from sklearn.metrics import accuracy_score
 # Get data from .csv file
 data = pd.read_csv('../../data/tiatinic/train/train.csv')
 
-
 # Encoder function
 def encodeText(data, col, encoder=OneHotEncoder()):
     encoded, categories = data[col].factorize()
@@ -36,7 +35,6 @@ imputer = Imputer()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train_imputed = imputer.fit_transform(X_train)
 X_test_imputed = imputer.transform(X_test)
-
 
 # Testing with SDGClassifier
 sdg_clf = SGDClassifier()
