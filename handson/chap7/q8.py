@@ -62,10 +62,13 @@ def votingClassifier():
                     ('sg', SGDClassifier())])
     hard_voting_clf.fit(X_train, y_train)
     print(hard_voting_clf.score(X_validation, y_validation))
+
     hard_voting_clf.set_params(sg=None)
     del hard_voting_clf.estimators_[2]
+    hard_voting_clf.voting = 'hard'
     print(hard_voting_clf.score(X_validation, y_validation))
-    # soft_voting_clf = VotingClassifier(voting='soft')
+    hard_voting_clf.voting = 'soft'
+    print(hard_voting_clf.score(X_validation, y_validation))
 
 
 # trainNonTunedClassifiers()
