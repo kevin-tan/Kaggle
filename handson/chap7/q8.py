@@ -66,8 +66,6 @@ def votingClassifier():
 
     hard_voting_clf.set_params(sg=None)
     del hard_voting_clf.estimators_[2]
-    print(hard_voting_clf.score(X_validation, y_validation))
-
     hard_voting_clf.voting = 'soft'
     print(hard_voting_clf.score(X_validation, y_validation))
 
@@ -94,15 +92,15 @@ data = np.array([rf_pred, et_pred, sgd_pred])
 # Stacking ensemble
 stacking_data = pd.DataFrame(columns=['rd_pred', 'et_pred', 'sgd_pred'],
                              data=data.T)
-blender = RandomForestClassifier(n_estimators=50)
+blender = RandomForestClassifier()
 blender.fit(stacking_data, y_validation)
 
 
 def predict(x):
-    data = np.array([rf_clf.predict(x), et_clf.predict(x), sgd_clf.predict(x)])
-    stacking_data = pd.DataFrame(columns=['rd_pred', 'et_pred', 'sgd_pred'],
-                                 data=data.T)
-    return blender.predict(stacking_data)
+    d = np.array([rf_clf.predict(x), et_clf.predict(x), sgd_clf.predict(x)])
+    s_d = pd.DataFrame(columns=['rd_pred', 'et_pred', 'sgd_pred'],
+                       data=d.T)
+    return blender.predict(s_d)
 
 
 print(accuracy_score(y_test, predict(X_test)))
