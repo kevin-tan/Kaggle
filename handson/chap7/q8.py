@@ -65,8 +65,8 @@ def votingClassifier():
 
     hard_voting_clf.set_params(sg=None)
     del hard_voting_clf.estimators_[2]
-    hard_voting_clf.voting = 'hard'
     print(hard_voting_clf.score(X_validation, y_validation))
+
     hard_voting_clf.voting = 'soft'
     print(hard_voting_clf.score(X_validation, y_validation))
 
