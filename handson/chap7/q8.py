@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, VotingClassifier
@@ -73,3 +74,35 @@ def votingClassifier():
 
 # trainNonTunedClassifiers()
 votingClassifier()
+
+# Random Forest Classifier
+rf_clf = RandomForestClassifier()
+rf_clf.fit(X_train, y_train)
+rf_pred = rf_clf.predict(X_validation)
+
+# Extra-Trees Classifier
+et_clf = ExtraTreesClassifier()
+et_clf.fit(X_train, y_train)
+et_pred = et_clf.predict(X_validation)
+
+# SGDClassifier
+sgd_clf = SGDClassifier()
+sgd_clf.fit(X_train, y_train)
+sgd_pred = sgd_clf.predict(X_validation)
+
+data = np.array([rf_pred, et_pred, sgd_pred])
+# Stacking ensemble
+stacking_data = pd.DataFrame(columns=['rd_pred', 'et_pred', 'sgd_pred'],
+                             data=data.T)
+blender = RandomForestClassifier(n_estimators=50)
+blender.fit(stacking_data, y_validation)
+
+
+def predict(x):
+    data = np.array([rf_clf.predict(x), et_clf.predict(x), sgd_clf.predict(x)])
+    stacking_data = pd.DataFrame(columns=['rd_pred', 'et_pred', 'sgd_pred'],
+                                 data=data.T)
+    return blender.predict(stacking_data)
+
+
+print(accuracy_score(y_test, predict(X_test)))
