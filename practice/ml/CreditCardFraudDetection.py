@@ -3,7 +3,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot
 
-data = pd.read_csv('../data/creditcard/creditcard.csv')
+data = pd.read_csv('../../data/creditcard/creditcard.csv')
 data.set_index(['Time'], inplace=True)
 print(data.head(100))
 
