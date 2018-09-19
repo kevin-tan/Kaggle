@@ -7,8 +7,8 @@ from sklearn.preprocessing import Imputer
 from sklearn.model_selection import cross_val_score
 
 # Load .csv file
-data = pd.read_csv("../data/houses/train.csv")
-test_data = pd.read_csv("../data/houses/test.csv")
+data = pd.read_csv("../../data/houses/train.csv")
+test_data = pd.read_csv("../../data/houses/test.csv")
 
 # Setup train_X/train_Y, test_X/test_Y data
 features = ["LotArea", "YearBuilt", "1stFlrSF", "2ndFlrSF", "FullBath", "BedroomAbvGr", "TotRmsAbvGrd"]
