@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_score, cross_val_predict, GridSear
 from sklearn.metrics import accuracy_score
 
 # Get data from .csv file
-data = pd.read_csv('../../data/tiatinic/train/train.csv')
+data = pd.read_csv('../../../data/tiatinic/train/train.csv')
 
 # Encoder function
 def encodeText(data, col, encoder=OneHotEncoder()):

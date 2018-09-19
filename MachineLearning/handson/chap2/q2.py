@@ -5,7 +5,7 @@ from scipy.ndimage.interpolation import shift
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 
-data = pd.read_csv('../../data/mnist/digit/train/train.csv')
+data = pd.read_csv('../../../data/mnist/digit/train/train.csv')
 data_copy = data.copy()
 new_data = []
 for row in data_copy.iterrows():

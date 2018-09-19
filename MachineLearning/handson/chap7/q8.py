@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC, LinearSVC
 
 # Fetch MNIST digit data
-data = pd.read_csv('../../data/mnist/digit/train/train.csv')
+data = pd.read_csv('../../../data/mnist/digit/train/train.csv')
 
 
 # Function to get separate features and target data

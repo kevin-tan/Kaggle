@@ -6,7 +6,7 @@ import sklearn.preprocessing as pre
 import scipy.stats as sp
 import sklearn.metrics as mt
 
-train_data = pd.read_csv('../../data/mnist/digit/train/train.csv')
+train_data = pd.read_csv('../../../data/mnist/digit/train/train.csv')
 
 # Data processing
 y = train_data.label

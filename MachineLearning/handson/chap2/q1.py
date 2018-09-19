@@ -4,7 +4,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import *
 from sklearn.linear_model import *
 
-data = pd.read_csv('../../data/mnist/digit/train/train.csv')
+data = pd.read_csv('../../../data/mnist/digit/train/train.csv')
 
 # Preparing data
 data.dropna(axis=0, inplace=True)
